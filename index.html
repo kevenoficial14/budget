@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Orçamentos IA Pro 2024</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#764ba2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Partículas de fundo -->
+    <div id="particles" class="fixed inset-0 pointer-events-none"></div>
+    
+    <!-- Header Superior -->
+    <nav class="fixed top-0 left-0 right-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🤖</div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">IA Orçamentos Pro</h1>
+                    <p class="text-white/70 text-xs">Versão 2024.1</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="themeToggle" class="text-white hover:text-yellow-300 transition-colors">
+                    <i class="fas fa-sun text-xl"></i>
+                </button>
+                <button onclick="showInfoModal()" class="text-white hover:text-green-300 transition-colors">
+                    <i class="fas fa-info-circle text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 pt-20 relative z-10">
+        <!-- Header Principal -->
+        <div class="text-center mb-12 floating">
+            <div class="inline-block p-6 rounded-full bg-white/10 mb-6 glow">
+                <div class="text-8xl animate-pulse-slow">🤖</div>
+            </div>
+            <h1 class="text-6xl font-bold text-white mb-4 typing-animation">Gerador de Orçamentos IA Pro</h1>
+            <p class="text-2xl text-white/80 mb-8">Inteligência Artificial Avançada • Geração de PDF • 100% Profissional</p>
+            <div class="flex justify-center gap-6 text-white/70 flex-wrap">
+                <span class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>IA Ativa
+                </span>
+                <span class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span>PDF Nativo
+                </span>
+                <span class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span>Multi-idioma
+                </span>
+                <span class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></span>Auto-Save
+                </span>
+            </div>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="mb-8">
+            <div class="glass-effect rounded-2xl p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-white font-medium">Progresso do Orçamento</span>
+                    <span id="progressPercentage" class="text-white font-bold">0%</span>
+                </div>
+                <div class="bg-white/20 rounded-full h-4 overflow-hidden">
+                    <div id="progressBar" class="progress-gradient h-full rounded-full transition-all duration-500 relative" style="width: 0%">
+                        <div class="absolute inset-0 bg-white/30 animate-pulse"></div>
+                    </div>
+                </div>
+                <p id="progressText" class="text-white/80 text-center mt-3">Preencha os dados para começar</p>
+            </div>
+        </div>
+
+        <div class="grid xl:grid-cols-3 gap-8">
+            <!-- Painel de Configuração -->
+            <div class="xl:col-span-1 space-y-6">
+                <div class="glass-effect rounded-2xl p-6 border border-white/20">
+                    <!-- Abas de Configuração -->
+                    <div class="flex mb-6 bg-white/10 rounded-lg p-1">
+                        <button onclick="switchTab('basic')" id="basicTab" class="tab-btn active">
+                            <i class="fas fa-clipboard-list"></i> Básico
+                        </button>
+                        <button onclick="switchTab('advanced')" id="advancedTab" class="tab-btn">
+                            <i class="fas fa-cog"></i> Avançado
+                        </button>
+                        <button onclick="switchTab('ai')" id="aiTab" class="tab-btn">
+                            <i class="fas fa-robot"></i> IA
+                        </button>
+                    </div>
+
+                    <!-- Aba Básico -->
+                    <div id="basicContent" class="tab-content">
+                        <!-- Dados da Empresa -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-building"></i> Dados da Empresa
+                                <button onclick="fillSampleData('company')" class="sample-btn">
+                                    <i class="fas fa-magic"></i> Exemplo
+                                </button>
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="input-group">
+                                    <input type="text" id="companyName" placeholder="Nome da Empresa" class="form-input">
+                                    <i class="fas fa-building input-icon"></i>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="input-group">
+                                        <input type="text" id="companyPhone" placeholder="Telefone" class="form-input">
+                                        <i class="fas fa-phone input-icon"></i>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="email" id="companyEmail" placeholder="E-mail" class="form-input">
+                                        <i class="fas fa-envelope input-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="companyAddress" placeholder="Endereço (opcional)" class="form-input">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="companyCNPJ" placeholder="CNPJ (opcional)" class="form-input">
+                                    <i class="fas fa-id-card input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dados do Cliente -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user"></i> Dados do Cliente
+                                <button onclick="fillSampleData('client')" class="sample-btn">
+                                    <i class="fas fa-magic"></i> Exemplo
+                                </button>
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="input-group">
+                                    <input type="text" id="clientName" placeholder="Nome do Cliente" class="form-input">
+                                    <i class="fas fa-user input-icon"></i>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="input-group">
+                                        <input type="text" id="clientPhone" placeholder="Telefone" class="form-input">
+                                        <i class="fas fa-phone input-icon"></i>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="email" id="clientEmail" placeholder="E-mail" class="form-input">
+                                        <i class="fas fa-envelope input-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="clientCompany" placeholder="Empresa do Cliente (opcional)" class="form-input">
+                                    <i class="fas fa-building input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Projeto -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-bullseye"></i> Projeto
+                            </h3>
+                            <div class="space-y-3">
+                                <select id="serviceType" class="form-select">
+                                    <option value="">Selecione o tipo de serviço</option>
+                                    <option value="desenvolvimento-web">💻 Desenvolvimento Web</option>
+                                    <option value="desenvolvimento-mobile">📱 Desenvolvimento Mobile</option>
+                                    <option value="design-grafico">🎨 Design Gráfico</option>
+                                    <option value="marketing-digital">📈 Marketing Digital</option>
+                                    <option value="consultoria">💼 Consultoria</option>
+                                    <option value="manutencao">🔧 Manutenção</option>
+                                    <option value="e-commerce">🛒 E-commerce</option>
+                                    <option value="seo">🔍 SEO</option>
+                                    <option value="personalizado">⚡ Personalizado</option>
+                                </select>
+                                <div class="input-group">
+                                    <textarea id="projectDescription" rows="4" placeholder="Descreva detalhadamente o projeto..." class="form-textarea"></textarea>
+                                    <i class="fas fa-file-alt input-icon"></i>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="input-group">
+                                        <label class="input-label">💰 Valor (R$)</label>
+                                        <input type="number" id="projectValue" placeholder="0,00" class="form-input" min="0" step="0.01">
+                                        <i class="fas fa-dollar-sign input-icon"></i>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">⏱️ Prazo (dias)</label>
+                                        <input type="number" id="projectDeadline" placeholder="30" class="form-input" min="1">
+                                        <i class="fas fa-calendar input-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Avançado -->
+                    <div id="advancedContent" class="tab-content hidden">
+                        <!-- Configurações de Pagamento -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-credit-card"></i> Pagamento
+                            </h3>
+                            <div class="space-y-3">
+                                <select id="paymentMethod" class="form-select">
+                                    <option value="a-vista">À Vista (desconto 5%)</option>
+                                    <option value="parcelado">Parcelado em até 12x</option>
+                                    <option value="50-50">50% entrada + 50% entrega</option>
+                                    <option value="30-70">30% entrada + 70% entrega</option>
+                                    <option value="personalizado">Personalizado</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="discountPercent" placeholder="Desconto (%)" class="form-input" min="0" max="100">
+                                    <i class="fas fa-percentage input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Itens do Orçamento -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-list"></i> Itens do Orçamento
+                                <button onclick="addBudgetItem()" class="action-btn bg-green-500 hover:bg-green-600">
+                                    <i class="fas fa-plus"></i> Adicionar
+                                </button>
+                            </h3>
+                            <div id="budgetItems" class="space-y-2">
+                                <!-- Itens serão adicionados dinamicamente -->
+                            </div>
+                            <div class="mt-4 p-3 bg-white/5 rounded-lg">
+                                <div class="flex justify-between text-white">
+                                    <span>Total dos Itens:</span>
+                                    <span id="itemsTotal" class="font-bold">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configurações de Entrega -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-truck"></i> Entrega
+                            </h3>
+                            <div class="space-y-3">
+                                <select id="deliveryType" class="form-select">
+                                    <option value="digital">Digital (Online)</option>
+                                    <option value="presencial">Presencial</option>
+                                    <option value="hibrido">Híbrido</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" id="supportDays" placeholder="Dias de suporte gratuito" value="30" class="form-input" min="0">
+                                    <i class="fas fa-headset input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba IA -->
+                    <div id="aiContent" class="tab-content hidden">
+                        <!-- Configurações de IA -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-brain"></i> Configurações de IA
+                            </h3>
+                            <div class="space-y-3">
+                                <select id="budgetTone" class="form-select">
+                                    <option value="profissional">👔 Profissional</option>
+                                    <option value="amigavel">😊 Amigável</option>
+                                    <option value="formal">🎩 Formal</option>
+                                    <option value="criativo">🎨 Criativo</option>
+                                    <option value="tecnico">🔬 Técnico</option>
+                                    <option value="vendas">💼 Focado em Vendas</option>
+                                </select>
+                                <select id="budgetLanguage" class="form-select">
+                                    <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+                                    <option value="en-US">🇺🇸 English (US)</option>
+                                    <option value="es-ES">🇪🇸 Español</option>
+                                    <option value="fr-FR">🇫🇷 Français</option>
+                                </select>
+                                <select id="budgetComplexity" class="form-select">
+                                    <option value="simples">📄 Simples</option>
+                                    <option value="detalhado">📋 Detalhado</option>
+                                    <option value="completo">📚 Completo</option>
+                                    <option value="executivo">💼 Executivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- IA Assistente -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-robot"></i> Assistente IA
+                            </h3>
+                            <div class="ai-suggestions-box">
+                                <div id="aiSuggestions" class="text-white/80 text-sm">
+                                    💡 <strong>Dica Inteligente:</strong> Descreva seu projeto em detalhes para que a IA possa gerar um orçamento mais preciso!
+                                </div>
+                            </div>
+                            <button onclick="getAISuggestions()" class="action-btn bg-purple-500 hover:bg-purple-600 w-full">
+                                <i class="fas fa-lightbulb"></i> Obter Sugestões da IA
+                            </button>
+                        </div>
+
+                        <!-- Templates -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-layer-group"></i> Templates IA
+                            </h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="loadTemplate('web')" class="template-btn bg-blue-500 hover:bg-blue-600">
+                                    <i class="fas fa-globe"></i> Web
+                                </button>
+                                <button onclick="loadTemplate('mobile')" class="template-btn bg-green-500 hover:bg-green-600">
+                                    <i class="fas fa-mobile-alt"></i> Mobile
+                                </button>
+                                <button onclick="loadTemplate('design')" class="template-btn bg-pink-500 hover:bg-pink-600">
+                                    <i class="fas fa-palette"></i> Design
+                                </button>
+                                <button onclick="loadTemplate('marketing')" class="template-btn bg-orange-500 hover:bg-orange-600">
+                                    <i class="fas fa-bullhorn"></i> Marketing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="mt-8 space-y-3">
+                        <button onclick="generateBudget()" class="generate-btn">
+                            <span id="generateText">
+                                <i class="fas fa-rocket"></i> Gerar Orçamento com IA
+                            </span>
+                            <span id="loadingText" class="hidden">
+                                <i class="fas fa-spinner fa-spin"></i> IA Processando...
+                            </span>
+                        </button>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="saveTemplate()" class="secondary-btn">
+                                <i class="fas fa-save"></i> Salvar Template
+                            </button>
+                            <button onclick="clearForm()" class="secondary-btn">
+                                <i class="fas fa-trash"></i> Limpar Tudo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Save Indicator -->
+                <div id="autoSaveIndicator" class="glass-effect rounded-lg p-3 border border-white/20 text-center text-white/70 text-sm">
+                    <i class="fas fa-save"></i> Auto-save ativo
+                </div>
+            </div>
+
+            <!-- Painel de Resultado -->
+            <div class="xl:col-span-2 space-y-6">
+                <!-- Resultado do Orçamento -->
+                <div class="glass-effect rounded-2xl p-6 border border-white/20">
+                    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+                        <h2 class="text-2xl font-semibold text-white flex items-center gap-3">
+                            <i class="fas fa-file-invoice-dollar"></i> Orçamento Gerado
+                            <span id="budgetStatus" class="status-badge hidden">
+                                <i class="fas fa-check"></i> Pronto
+                            </span>
+                        </h2>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="previewBudget()" class="tool-btn bg-indigo-500 hover:bg-indigo-600">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button onclick="editBudget()" class="tool-btn bg-blue-500 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button onclick="copyBudget()" class="tool-btn bg-green-500 hover:bg-green-600">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                            <button onclick="downloadPDF()" class="tool-btn bg-red-500 hover:bg-red-600">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button onclick="downloadHTML()" class="tool-btn bg-orange-500 hover:bg-orange-600">
+                                <i class="fas fa-code"></i> HTML
+                            </button>
+                            <button onclick="printBudget()" class="tool-btn bg-gray-500 hover:bg-gray-600">
+                                <i class="fas fa-print"></i> Imprimir
+                            </button>
+                            <button onclick="shareBudget()" class="tool-btn bg-pink-500 hover:bg-pink-600">
+                                <i class="fas fa-share-alt"></i> Compartilhar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Estatísticas -->
+                    <div id="budgetStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 hidden">
+                        <div class="stat-card">
+                            <div class="stat-value" id="statWords">0</div>
+                            <div class="stat-label">Palavras</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statChars">0</div>
+                            <div class="stat-label">Caracteres</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statItems">0</div>
+                            <div class="stat-label">Itens</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statScore">0</div>
+                            <div class="stat-label">Score IA</div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado -->
+                    <div id="budgetResult" class="budget-display">
+                        <div class="empty-state">
+                            <div class="text-8xl mb-6 floating">🤖</div>
+                            <h3 class="text-2xl font-bold mb-4">Pronto para criar seu orçamento profissional?</h3>
+                            <p class="text-gray-500 mb-8">Preencha os dados ao lado e deixe nossa IA trabalhar para você!</p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div class="feature-highlight">
+                                    <i class="fas fa-robot text-2xl mb-2"></i>
+                                    <p>IA Avançada</p>
+                                </div>
+                                <div class="feature-highlight">
+                                    <i class="fas fa-file-pdf text-2xl mb-2"></i>
+                                    <p>PDF Nativo</p>
+                                </div>
+                                <div class="feature-highlight">
+                                    <i class="fas fa-palette text-2xl mb-2"></i>
+                                    <p>Design Pro</p>
+                                </div>
+                                <div class="feature-highlight">
+                                    <i class="fas fa-lightning-bolt text-2xl mb-2"></i>
+                                    <p>Super Rápido</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editor -->
+                    <div id="budgetEditor" class="hidden">
+                        <div class="editor-toolbar">
+                            <button onclick="formatText('bold')" class="editor-btn" title="Negrito">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button onclick="formatText('italic')" class="editor-btn" title="Itálico">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button onclick="formatText('underline')" class="editor-btn" title="Sublinhado">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                            <div class="toolbar-separator"></div>
+                            <select onchange="changeFontSize(this.value)" class="editor-select">
+                                <option value="12">12px</option>
+                                <option value="14" selected>14px</option>
+                                <option value="16">16px</option>
+                                <option value="18">18px</option>
+                                <option value="20">20px</option>
+                            </select>
+                            <button onclick="insertTable()" class="editor-btn" title="Inserir Tabela">
+                                <i class="fas fa-table"></i>
+                            </button>
+                            <button onclick="aiImprove()" class="editor-btn ai-btn" title="Melhorar com IA">
+                                <i class="fas fa-magic"></i> IA
+                            </button>
+                        </div>
+                        <div contenteditable="true" id="editableContent" class="editor-content"></div>
+                        <div class="editor-actions">
+                            <button onclick="saveBudget()" class="action-btn bg-green-500 hover:bg-green-600">
+                                <i class="fas fa-check"></i> Salvar
+                            </button>
+                            <button onclick="cancelEdit()" class="action-btn bg-gray-500 hover:bg-gray-600">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button onclick="previewEdit()" class="action-btn bg-blue-500 hover:bg-blue-600">
+                                <i class="fas fa-eye"></i> Visualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="glass-effect rounded-2xl p-6 border border-white/20">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-white flex items-center gap-2">
+                                <i class="fas fa-history"></i> Histórico
+                            </h3>
+                            <button onclick="clearHistory()" class="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+                                <i class="fas fa-trash"></i> Limpar
+                            </button>
+                        </div>
+                        <div id="budgetHistory" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                            <p class="text-white/70 text-center py-4">Nenhum orçamento salvo ainda</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-effect rounded-2xl p-6 border border-white/20">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-white flex items-center gap-2">
+                                <i class="fas fa-layer-group"></i> Templates
+                            </h3>
+                            <button onclick="manageTemplates()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                                <i class="fas fa-cog"></i> Gerenciar
+                            </button>
+                        </div>
+                        <div id="templatesList" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                            <p class="text-white/70 text-center py-4">Nenhum template salvo ainda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content max-w-6xl">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-eye"></i> Preview do Orçamento
+                </h3>
+                <button onclick="closeModal('previewModal')" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="previewContent" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-info-circle"></i> Sobre o Sistema
+                </h3>
+                <button onclick="closeModal('infoModal')" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4">🤖</div>
+                    <h2 class="text-2xl font-bold mb-2">Gerador de Orçamentos IA Pro</h2>
+                    <p class="text-gray-600">Versão 2024.1 - Sistema Profissional</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold mb-2"><i class="fas fa-star"></i> Recursos</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>✅ IA Avançada para geração automática</li>
+                            <li>✅ Export PDF de alta qualidade</li>
+                            <li>✅ Templates inteligentes</li>
+                            <li>✅ Auto-save automático</li>
+                            <li>✅ Sistema de backup completo</li>
+                            <li>✅ Editor visual avançado</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2"><i class="fas fa-keyboard"></i> Atalhos</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li><kbd>Ctrl+S</kbd> - Salvar</li>
+                            <li><kbd>Ctrl+Shift+Enter</kbd> - Gerar</li>
+                            <li><kbd>Ctrl+P</kbd> - Imprimir</li>
+                            <li><kbd>Esc</kbd> - Fechar modal</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-question-circle"></i> Confirmação
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" class="mb-6"></p>
+                <div class="flex justify-end gap-3">
+                    <button onclick="confirmAction(false)" class="action-btn bg-gray-500 hover:bg-gray-600">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button onclick="confirmAction(true)" class="action-btn bg-red-500 hover:bg-red-600">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Aviso
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage" class="mb-6"></p>
+                <div class="flex justify-end">
+                    <button onclick="closeModal('alertModal')" class="action-btn bg-blue-500 hover:bg-blue-600">
+                        <i class="fas fa-check"></i> OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <div id="actionLoading" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center">
+            <div class="text-6xl mb-4 animate-spin">⚙️</div>
+            <p class="text-xl font-semibold mb-2">Processando...</p>
+            <p class="text-gray-600">Aguarde um momento</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
